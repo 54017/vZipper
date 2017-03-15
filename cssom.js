@@ -30,13 +30,32 @@
 		    map = new Map(),
 		    arr;
 		while (arr = reg.exec(css)) {
+            // 去掉url()内的字符先，例如 url("images;/test.jpg")
+            let urlReg    = /url\s*\((.*\s*)\)/g;
+            let urlMap = new Map();
+            arr[2] = arr[2].replace(urlReg, function(str) {
+                let random = Math.random();
+                urlMap.set(random, str);
+                return '$' + random + '$';
+            })
 			let properties = arr[2].split(';'),
 			    rules      = [];
 			for (let i = 0, len = properties.length; i < len; ++i) {
                 if (properties[i] == '') continue;
-				let property = properties[i].split(":");
-                property[1] = property[1].trim();
-                property[0] = property[0].trim();
+                properties[i] = properties[i].replace(/\$(\d\.\d+)\$/, function(str, number) {
+                    number = +number;
+                    let originalStr = urlMap.get(number);
+                    if (originalStr) {
+                        return originalStr;
+                    } else {
+                        return number;
+                    }
+                })
+                let ruleKeyValueReg = /(.+?)\s*:\s*(.*)/g;
+				let ruleKeyValue = ruleKeyValueReg.exec(properties[i]),
+                    property     = [];
+                property[1] = ruleKeyValue[2].trim();
+                property[0] = ruleKeyValue[1].trim();
 				rules.push(property);
 			}
             let existed  = map.get(arr[1].trim()),
@@ -110,8 +129,9 @@
         	}
         }
         // 去掉被优先级干掉的 css rule
-        let $selector = $(selector);
         for (selector of map.keys()) {
+            if (selector.indexOf(':') >= 0) continue;
+            let $selector = $(selector);
         	$selector.each((i, elem) => {
         		let $this    = $($selector[i]),
         		    dataRule = $this.data('rule') || '{}',
@@ -125,7 +145,6 @@
                         
                         dataRule[rule[0]] = selector;
 					} else {
-                        console.log('wtf', dataRule[rule[0]], selector, priority.compare(priority.parse(dataRule[rule[0]]), priority.parse(selector)));
                     }
 
     			}
@@ -133,6 +152,7 @@
         	})
         }
         for (let selector of map.keys()) {
+            if (selector.indexOf(':') >= 0) continue;
             let rules          = map.get(selector),
                 matchedHtml    = $(selector),
                 matchedHtmlLen = matchedHtml.length;
@@ -142,7 +162,6 @@
                     let $this    = $(matchedHtml[index]),
                         dataRule = $this.data('rule') || '{}';
                     dataRule = JSON.parse(dataRule);
-                    console.log("dataRule", dataRule, "Selector", selector, "rule", rule);
                     if (dataRule[rule[0]] === selector) {
                         return false;
                     } else if (index === matchedHtmlLen - 1) {
@@ -152,9 +171,7 @@
             }
             map.set(selector, rules);
         }
-        for (let selector of map.keys()) {
-            console.log("selector", selector, map.get(selector));
-        }
+        console.log(map);
     }
 
     return zipCss;
