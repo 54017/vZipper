@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+	<title>vTester</title>
+	<link rel="stylesheet" type="text/css" href="./css/index.css">
+	<link rel="stylesheet" type="text/css" href="./css/weui.min.css">
+</head>
+<body>
+	<div class="weui-cells__title">HTML</div>
+	<div class="weui-cells weui-cells_form">
+	    <div class="weui-cell">
+	        <div class="weui-cell__bd">
+	            <textarea class="weui-textarea" placeholder="请输入HTML" rows="5" id="html"></textarea>
+	        </div>
+	    </div>
+	</div>
+	<div class="weui-cells__title">CSS</div>
+	<div class="weui-cells weui-cells_form">
+	    <div class="weui-cell">
+	        <div class="weui-cell__bd">
+	            <textarea class="weui-textarea" placeholder="请输入CSS" rows="5" id="css"></textarea>
+	        </div>
+	    </div>
+	</div>
+	<div class="weui-cells__title">JS</div>
+	<div class="weui-cells weui-cells_form">
+	    <div class="weui-cell">
+	        <div class="weui-cell__bd">
+	            <textarea class="weui-textarea" placeholder="请输入JS" rows="5" id="js"></textarea>
+	        </div>
+	    </div>
+	</div>
+	<div class="button-sp-area">
+		<a href="javascript:;" class="weui-btn weui-btn_plain-primary" id="submit">提交</a>
+	</div>
+	<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript">
+		$('#submit').click(function() {
+			var html = $('#html').val();
+			var css = $('#css').val();
+			var js = $('#js').val();
+			$.post('/zip', { html: html, css: css, js: js }, function(data) {
+				console.log("data: ", data);
+			})
+		})
+	</script>
+</body>
+</html>
